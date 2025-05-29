@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "dist/src/server.js",
   "scripts": {
+    "build":"tsc --build",
     "start": "NODE_ENV=production node dist/server.js",
     "dev": "NODE_ENV=development nodemon src/server.ts"
   },
