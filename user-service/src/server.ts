@@ -19,9 +19,6 @@ app.use("/api", authRouter);
 
 app.use(globalErrorHandler);
 
-
-
-
 const server = app.listen(PORT, () => {
     console.log("")
     console.log(" ███████╗███████╗██████╗ ")
