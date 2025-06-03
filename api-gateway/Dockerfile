@@ -1,24 +1,42 @@
-FROM node:20-slim
+FROM node:20-alpine as base
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm ci --only=production
+EXPOSE 5000
+
+
+FROM base as development
+
+RUN --mount=type=cache,target=/usr/src/app/.npm \
+  npm set cache /usr/src/app/.npm && \
+  npm install
+
+COPY . .
+
+CMD ["npm", "run", "dev"]
+
+# ----- Stage 1: Build -----
+FROM base as build
+
+COPY package*.json ./
+RUN npm ci --only=development
 
 COPY . .
 
 RUN npm run build
 
-EXPOSE 5000
+# ----- Stage 2: Production -----
+FROM base AS production
+
+RUN --mount=type=cache,target=/usr/src/app/.npm \
+  npm set cache /usr/src/app/.npm && \
+  npm ci --only=production
+
+COPY package*.json ./
+
+COPY --from=builder /usr/src/app/dist ./dist
 
 CMD ["npm", "start"]
-
-
-
-
-
-
-
-
 

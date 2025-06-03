@@ -19,7 +19,10 @@ app.use("/api", authRouter);
 
 app.use(globalErrorHandler);
 
-app.listen(PORT, () => {
+
+
+
+const server = app.listen(PORT, () => {
     console.log("")
     console.log(" ███████╗███████╗██████╗ ")
     console.log(" ╚══███╔╝██╔════╝██╔══██╗")
@@ -31,3 +34,10 @@ app.listen(PORT, () => {
     console.log("🏃‍♂️ ZED IS RUNNING AND READY!")
     console.log(`⚡ Server active on http://localhost:${PORT}`)
 })
+
+process.on('SIGTERM', () => {
+    console.debug('SIGTERM signal received: closing HTTP server');
+    server.close(() => {
+        console.debug('HTTP server closed');
+    });
+});

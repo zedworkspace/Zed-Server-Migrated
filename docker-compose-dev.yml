@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  api-gateway:
+    build:
+      context: ./api-gateway
+      target: development
+    init: true
+    volumes:
+      - type: bind
+        source: ./api-gateway
+        target: /usr/src/app
+      - type: volume
+        target: /usr/src/app/node_modules
+    container_name: api-gateway
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./api-gateway/.env
+    depends_on:
+      - user-service
+    networks:
+      - zed-backend
+    restart: unless-stopped
+  user-service:
+    build:
+      context: ./user-service
+      target: development
+    init: true
+    volumes:
+      - type: bind
+        source: ./user-service
+        target: /usr/src/app
+      - type: volume
+        target: /usr/src/app/node_modules
+    container_name: user-service
+    ports:
+      - "5001:5001"
+    env_file:
+      - ./user-service/.env
+    networks:
+      - zed-backend
+    restart: unless-stopped
+
+networks:
+  zed-backend:
