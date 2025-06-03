@@ -36,7 +36,7 @@ RUN --mount=type=cache,target=/usr/src/app/.npm \
 
 COPY package*.json ./
 
-COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=build /usr/src/app/dist ./dist
 
 
 CMD ["npm", "start"]
