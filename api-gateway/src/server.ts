@@ -28,7 +28,8 @@ app.use("/api/v1", proxy(config.USER_SERVICE_URL, proxyOptions))
 
 app.use(globalErrorHandler)
 
-app.listen(PORT, () => {
+
+const server = app.listen(PORT, () => {
   console.log("")
   console.log(" ███████╗███████╗██████╗    ██████╗  █████╗ ████████╗███████╗██╗    ██╗ █████╗ ██╗   ██╗")
   console.log(" ╚══███╔╝██╔════╝██╔══██╗  ██╔════╝ ██╔══██╗╚══██╔══╝██╔════╝██║    ██║██╔══██╗╚██╗ ██╔╝")
@@ -41,3 +42,9 @@ app.listen(PORT, () => {
   console.log(`⚡ Server active on http://localhost:${PORT}`)
 });
 
+process.on('SIGTERM', () => {
+  console.debug('SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    console.debug('HTTP server closed');
+  });
+});
