@@ -14,6 +14,7 @@ app.use(
   })
 );
 
+
 const proxyOptions = {
   proxyReqPathResolver(req: Request) {
     return req.originalUrl.replace(/^\/api\/v1/, "/api")
@@ -27,7 +28,6 @@ const proxyOptions = {
 app.use("/api/v1", proxy(config.USER_SERVICE_URL, proxyOptions))
 
 app.use(globalErrorHandler)
-
 
 const server = app.listen(PORT, () => {
   console.log("")

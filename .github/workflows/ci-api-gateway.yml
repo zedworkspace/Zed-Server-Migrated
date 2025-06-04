@@ -2,17 +2,24 @@ name: Build and Push API Gateway Image
 
 on:
   push:
-    branches:
-      - main
-      - beta
+    branches: [main, beta]
   pull_request:
-    branches:
-      - main
-      - beta
+    branches: [main, beta]
 
 jobs:
+  pr-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: test working
+        run: echo "Pr is running..."
+
   build-tag-push:
-    if: github.repository == 'zedworkspace/Zed-Server-Migrated'
+    if: github.repository == 'zedworkspace/Zed-Server-Migrated' && github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
