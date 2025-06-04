@@ -1,9 +1,9 @@
 name: Build and Push API Gateway Image
 
 on:
-  push:
+  pull_request:
     branches:
-      - docker-compose
+      - main
 
 jobs:
   build-tag-push:
