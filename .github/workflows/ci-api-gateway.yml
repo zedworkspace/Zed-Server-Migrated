@@ -19,7 +19,7 @@ jobs:
         run: echo "Pr is running..."
 
   build-tag-push:
-    if: github.repository == 'zedworkspace/Zed-Server-Migrated'
+    if: github.repository == 'zedworkspace/Zed-Server-Migrated' && github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:

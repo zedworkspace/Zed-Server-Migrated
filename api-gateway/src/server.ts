@@ -14,6 +14,7 @@ app.use(
   })
 );
 
+
 const proxyOptions = {
   proxyReqPathResolver(req: Request) {
     return req.originalUrl.replace(/^\/api\/v1/, "/api")
