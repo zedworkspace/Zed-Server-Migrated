@@ -1,6 +1,10 @@
 name: Build and Push API Gateway Image
 
 on:
+  push:
+    branches:
+      - main
+      - beta
   pull_request:
     branches:
       - main
@@ -8,6 +12,7 @@ on:
 
 jobs:
   build-tag-push:
+    if: github.repository == 'zedworkspace/Zed-Server-Migrated'
     runs-on: ubuntu-latest
 
     steps:
