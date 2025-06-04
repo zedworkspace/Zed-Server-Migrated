@@ -28,7 +28,6 @@ app.use("/api/v1", proxy(config.USER_SERVICE_URL, proxyOptions))
 
 app.use(globalErrorHandler)
 
-
 const server = app.listen(PORT, () => {
   console.log("")
   console.log(" ███████╗███████╗██████╗    ██████╗  █████╗ ████████╗███████╗██╗    ██╗ █████╗ ██╗   ██╗")
