@@ -25,8 +25,8 @@ export const emailRegister = async (res : Response, userData : IUser) : Promise<
     const avatarUrl = `https://ui-avatars.com/api/?name=${name.charAt(0)}&random`;
     const user = await User.create({name,email,profileImg:avatarUrl,password:hashedPassword});
     if(!user) throw new CustomError('User not created !',400);
-    const accessToken = generateAccessToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
     sendRefreshToken(res,refreshToken);
     return {
             _id:user._id,
@@ -43,8 +43,8 @@ export const emailSignIn = async (res : Response, userData : IUser) : Promise<ob
     if (!password || !user.password) throw new CustomError("Invalid credentials", 400);
     const verifyPassword = await bycrpt.compare(password,user.password);
     if(!verifyPassword) throw new CustomError('Invalid email or password !',404);
-    const accessToken = generateAccessToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
     sendRefreshToken(res,refreshToken);
     return {
             _id:user._id,
@@ -56,8 +56,8 @@ export const emailSignIn = async (res : Response, userData : IUser) : Promise<ob
 };
 export const accessTokenGenerator = async (refToken:string) : Promise <object> => {
     const payload =  verifyRefreshToken(refToken);
-    if(!payload.userId) throw new CustomError("Unauthorized !",401);
-    const newAccessToken = generateAccessToken(payload.userId);
+    if(!payload) throw new CustomError("Unauthorized !",401);
+    const newAccessToken = generateAccessToken(payload);
     return {accessToken:newAccessToken}
 }
 export const sentResetOtp = async (userData : IUser) : Promise<object> => {
@@ -94,15 +94,15 @@ export const googleAuth = async (res:Response, credentialResponse : CredentialRe
     let accessToken,refreshToken;
     existUser = await User.findOne({email});
     if(existUser) {
-      accessToken = generateAccessToken(existUser._id);
-      refreshToken = generateRefreshToken(existUser._id);
+      accessToken = generateAccessToken(existUser);
+      refreshToken = generateRefreshToken(existUser);
       sendRefreshToken(res,refreshToken);
       user = existUser;
     }else{
       user = await User.create({email,name,profileImg:picture,googleId});
       if(!user) throw new CustomError("Auth faild !",400);
-      accessToken = generateAccessToken(user._id);
-      refreshToken = generateRefreshToken(user._id);
+      accessToken = generateAccessToken(user);
+      refreshToken = generateRefreshToken(user);
       sendRefreshToken(res,refreshToken);
     }
     if(!user) throw new CustomError("Auth faild !",400);
@@ -147,19 +147,19 @@ export const googleAuth = async (res:Response, credentialResponse : CredentialRe
     let refreshToken;
     existingUser = await User.findOne({ email });
     if (existingUser) {
-      refreshToken = generateRefreshToken(existingUser._id);
+      refreshToken = generateRefreshToken(existingUser);
       sendRefreshToken(res, refreshToken);
       user = existingUser;
     } else {
       user = await User.create({email,name,profileImg,gitHubId,});
       if (!user) throw new CustomError("Authentication failed!", 400);
-      refreshToken = generateRefreshToken(user._id);
+      refreshToken = generateRefreshToken(user);
       sendRefreshToken(res, refreshToken);
     }
     return {
       name: user.name,
       profileImg: user.profileImg,
       email: user.email,
-      accessToken: generateAccessToken(user._id),
+      accessToken: generateAccessToken(user),
     };
   };

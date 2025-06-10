@@ -25,7 +25,9 @@ const proxyOptions = {
   },
 }
 
-app.use("/api/v1", proxy(config.USER_SERVICE_URL, proxyOptions))
+app.use("/api/v1/user", proxy(config.USER_SERVICE_URL, proxyOptions))
+app.use("/api/v1/projects", proxy(config.PROJECT_SERVICE_URL, proxyOptions))
+app.use("/api/v1/boards", proxy(config.BOARD_SERVICE_URL, proxyOptions))
 
 app.use(globalErrorHandler)
 
