@@ -4,8 +4,7 @@ import CustomError from "../utils/CustomError";
 
 export const getProjectBoards = catchAsync(async (req, res) => {
   const { projectId } = req.params;
-  const user = req.user 
-
+  const user = req.user
   if (!user) throw new CustomError("user not found", 404);
   const boards = await boardService.getProjectBoards({
     projectId,

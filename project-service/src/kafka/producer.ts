@@ -43,3 +43,5 @@ export const sendProjectCreatedEvent = async (
         console.log("Error happened in send project create event", error);
     }
 };
+
+

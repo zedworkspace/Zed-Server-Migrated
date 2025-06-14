@@ -2,8 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import CustomError from "../utils/CustomError";
 import { config } from "../configs/config";
-import { IUser } from "../interfaces/userInterface";
-
+import { IUser } from "zedspace-shared-types";
 
 
 export const userAuth = async (

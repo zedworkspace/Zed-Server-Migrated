@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import Board from "../models/boardModel";
-// import Member from "../models/memberModel";
 import CustomError from "../utils/CustomError";
+import axios from "axios";
 
 export const getProjectBoards = async ({
   projectId,
@@ -10,28 +10,29 @@ export const getProjectBoards = async ({
   projectId: string;
   userId: mongoose.Types.ObjectId;
 }) => {
-  // const member = await Member.findOne({
-  //   userId,
-  //   projectId,
-  //   status: "active",
-  // });
-  // if (!member) {
-  //   return [];
-  // }
-  // const memberRoles = member.roles.map((role) => role.toString());
-  // const boards = await Board.aggregate([
-  //   {
-  //     $match: {
-  //       projectId: new mongoose.Types.ObjectId(projectId),
-  //       $or: [
-  //         { allowedRoles: { $size: 0 } },
-  //         { allowedRoles: { $in: memberRoles } },
-  //       ],
-  //     },
-  //   },
-  // ]);
+  const url = `${process.env.PROJECT_SERVICE_URL}/${projectId}/${userId}?status=active`
+  const response = await axios.get(url)
+  const member = response.data.data
 
-  // return boards;
+  if (!member) {
+    return [];
+  }
+
+  const memberRoles = member.roles.map((role: any) => role.toString());
+
+  const boards = await Board.aggregate([
+    {
+      $match: {
+        projectId: new mongoose.Types.ObjectId(projectId),
+        $or: [
+          { allowedRoles: { $size: 0 } },
+          { allowedRoles: { $in: memberRoles } },
+        ],
+      },
+    },
+  ]);
+
+  return boards;
 };
 
 export const getBoardById = async ({
@@ -73,16 +74,16 @@ export const getMembersByRoles = async (boardId: string) => {
 
   // const matchStage = board.allowedRoles.length
   //   ? {
-  //       projectId: board.projectId,
-  //       roles: {
-  //         $in: board.allowedRoles.map(
-  //           (role) => new mongoose.Types.ObjectId(role)
-  //         ),
-  //       },
-  //     }
+  //     projectId: board.projectId,
+  //     roles: {
+  //       $in: board.allowedRoles.map(
+  //         (role) => new mongoose.Types.ObjectId(role)
+  //       ),
+  //     },
+  //   }
   //   : {
-  //       projectId: board.projectId,
-  //     };
+  //     projectId: board.projectId,
+  //   };
 
   // const allowedMembers = await Member.aggregate([
   //   {

@@ -7,6 +7,9 @@ import { config } from "./configs/config";
 import projectRouter from "./routes/projectRouters";
 import { initKafkaTopics } from "./kafka/admin";
 import { connectProducer } from "./kafka/producer";
+import inviteRouter from "./routes/inviteRoutes";
+import memberRouter from "./routes/membersRoutes";
+import activityRouter from "./routes/activityRoutes";
 
 
 const app = express()
@@ -17,16 +20,16 @@ connectDB()
 
 initKafkaTopics().then(() => { connectProducer() })
 
-
 app.use(express.json());
 app.use(cookieParser());
 
 
-app.use("/api/projects/", projectRouter);
+app.use("/api/projects", projectRouter);
+app.use("/api/invite", inviteRouter);
+app.use("/api/project/members", memberRouter);
+app.use("/api/activity", activityRouter);
 
 app.use(globalErrorHandler);
-
-
 
 const server = app.listen(PORT, async () => {
     console.log("")

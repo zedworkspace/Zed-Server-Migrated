@@ -13,9 +13,9 @@ export async function initKafkaTopics(maxRetries = 5, delayMs = 3000) {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-            console.log(`📡 Kafka Admin: Connecting (Attempt ${attempt})...`);
+            console.log(`Kafka Admin: Connecting (Attempt ${attempt})...`);
             await admin.connect();
-            console.log("✅ Kafka Admin connected");
+            console.log("Kafka Admin connected");
 
             const result = await admin.createTopics({
                 topics: topicsList,
@@ -23,26 +23,26 @@ export async function initKafkaTopics(maxRetries = 5, delayMs = 3000) {
             });
 
             if (result) {
-                console.log(`🎯 Topic(s) created: ${topicsList.map(t => t.topic).join(", ")}`);
+                console.log(`Topic(s) created: ${topicsList.map(t => t.topic).join(", ")}`);
             } else {
-                console.log("ℹ️ Topic(s) already exist.");
+                console.log("Topic(s) already exist.");
             }
 
             break; // Success, exit retry loop
         } catch (error) {
-            console.error(`❌ Kafka Admin Error (Attempt ${attempt}):`, error);
+            console.error(`Kafka Admin Error (Attempt ${attempt}):`, error);
             if (attempt === maxRetries) {
-                console.error("🚫 Maximum retry limit reached. Kafka topics could not be initialized.");
+                console.error("Maximum retry limit reached. Kafka topics could not be initialized.");
             } else {
-                console.log(`⏳ Retrying in ${delayMs / 1000} seconds...`);
+                console.log(`Retrying in ${delayMs / 1000} seconds...`);
                 await new Promise(res => setTimeout(res, delayMs));
             }
         } finally {
             try {
                 await admin.disconnect();
-                console.log("🔌 Kafka Admin disconnected");
+                console.log("Kafka Admin disconnected");
             } catch (disconnectErr) {
-                console.error("⚠️ Error during Kafka admin disconnect:", disconnectErr);
+                console.error("Error during Kafka admin disconnect:", disconnectErr);
             }
         }
     }

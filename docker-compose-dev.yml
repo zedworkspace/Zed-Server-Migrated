@@ -23,7 +23,7 @@ services:
     volumes:
       - kafka-data:/var/lib/kafka/data
     healthcheck:
-      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      test: ["CMD", "/usr/bin/kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -52,6 +52,32 @@ services:
     networks:
       - zed-backend
     restart: unless-stopped
+  socket-gateway:
+    build:
+      context: ./socket-gateway
+      target: development
+    init: true
+    volumes:
+      - type: bind
+        source: ./socket-gateway
+        target: /usr/src/app
+      - type: volume
+        target: /usr/src/app/node_modules
+    container_name: socket-gateway
+    ports:
+      - "5005:5005"
+    env_file:
+      - ./socket-gateway/.env
+    networks:
+      - zed-backend
+    restart: unless-stopped
+    environment:
+      - KAFKA_CLIENT_ID=socket-gateway
+      - KAFKA_BROKERS=kafka:29092
+      - KAFKA_TOPIC_SEND_MESSAGE=send_message
+    depends_on:
+      kafka:
+        condition: service_healthy
 
   user-service:
     build:
@@ -72,6 +98,14 @@ services:
     networks:
       - zed-backend
     restart: unless-stopped
+    environment:
+      - KAFKA_CLIENT_ID=user-server
+      - KAFKA_BROKERS=kafka:29092
+      - KAFKA_TOPIC_SEND_MESSAGE=send_message
+      - KAFKA_TOPIC_CREATE_MESSAGE=create_message
+    depends_on:
+      kafka:
+        condition: service_healthy
 
   project-service:
     build:
@@ -96,6 +130,7 @@ services:
       - KAFKA_CLIENT_ID=project-service
       - KAFKA_BROKERS=kafka:29092
       - KAFKA_TOPIC_PROJECT=project_created
+      - KAFKA_TOPIC_CARD_MOVED=card_moved
     depends_on:
       kafka:
         condition: service_healthy
@@ -123,6 +158,32 @@ services:
       - KAFKA_CLIENT_ID=board-service
       - KAFKA_BROKERS=kafka:29092
       - KAFKA_TOPIC_PROJECT=project_created
+      - KAFKA_TOPIC_CARD_MOVED=card_moved
+    depends_on:
+      kafka:
+        condition: service_healthy
+  channel-service:
+    build:
+      context: ./channel-service
+      target: development
+    init: true
+    volumes:
+      - type: bind
+        source: ./channel-service
+        target: /usr/src/app
+      - type: volume
+        target: /usr/src/app/node_modules
+    container_name: channel-service
+    ports:
+      - "5004:5004"
+    env_file:
+      - ./channel-service/.env
+    networks:
+      - zed-backend
+    restart: unless-stopped
+    environment:
+      - KAFKA_CLIENT_ID=channel-service
+      - KAFKA_BROKERS=kafka:29092
     depends_on:
       kafka:
         condition: service_healthy

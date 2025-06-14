@@ -7,6 +7,8 @@ import { config } from "./configs/config";
 import boardRouter from "./routes/boardRouters";
 import { initKafkaTopics } from "./kafka/admin";
 import { consumeProjectCreated } from "./kafka/consumer";
+import listRouter from "./routes/listRouter";
+import cardRouter from "./routes/cardRouter";
 
 
 
@@ -19,7 +21,10 @@ connectDB()
 app.use(express.json());
 app.use(cookieParser());
 
+
 app.use("/api/boards", boardRouter);
+app.use("/api/lists", listRouter);
+app.use("/api/cards", cardRouter);
 
 initKafkaTopics()
 consumeProjectCreated()

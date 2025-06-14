@@ -2,7 +2,7 @@ import kafka from "../configs/kafka";
 import Board from "../models/boardModel";
 import topicFallback from "./topicFallback";
 
-const consumer = kafka.consumer({ groupId: "board-group-1" });
+const consumer = kafka.consumer({ groupId: "board-service-group" });
 
 const topic = process.env.KAFKA_TOPIC_PROJECT || "project_created";
 
@@ -10,17 +10,17 @@ export async function consumeProjectCreated() {
     try {
         await topicFallback(topic)
         // Now connect the consumer
-        console.log("📦 Consumer connecting...");
+        console.log("Consumer connecting...");
         await consumer.connect();
-        console.log("✅ Consumer connected!");
+        console.log("Consumer connected!");
 
         await consumer.subscribe({ topic, fromBeginning: true });
 
         await consumer.run({
             eachMessage: async ({ topic, message }) => {
 
-                console.log("📨 Topic:", topic);
-                console.log("📦 Message:", message);
+                console.log("Topic:", topic);
+                console.log("Message:", message);
 
                 const messageValueStr = message.value?.toString();
 
@@ -29,10 +29,10 @@ export async function consumeProjectCreated() {
                 try {
                     parsedMessage = JSON.parse(messageValueStr || '{}');
                 } catch (error) {
-                    console.error("❌ Failed to parse Kafka message:", error);
+                    console.error("Failed to parse Kafka message:", error);
                     return;
                 }
-                console.log("📦 Parsed Message:", parsedMessage);
+                console.log("Parsed Message:", parsedMessage);
 
                 await Board.create({
                     name: parsedMessage.name,
@@ -40,13 +40,13 @@ export async function consumeProjectCreated() {
                     isDefault: parsedMessage.isDefault,
                 });
 
-                console.log("💾 Board saved successfully.");
-                console.log("✅ MISSION SUCCESS....")
+                console.log("Board saved successfully.");
+                console.log("MISSION SUCCESS....")
 
             },
         });
 
     } catch (error) {
-        console.error("❌ Kafka consumer setup error:", error);
+        console.error("Kafka consumer setup error:", error);
     }
 }
