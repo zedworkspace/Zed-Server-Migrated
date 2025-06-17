@@ -1,39 +1,49 @@
 import jwt from "jsonwebtoken";
 import { config } from "../configs/config";
 import CustomError from "./CustomError";
-import { Types } from "mongoose";
 import { Response } from "express";
+import { IUser } from "../interfaces/userInterface";
 
-interface Itoken {
-    userId: Types.ObjectId,
-};
 
-export const generateAccessToken = (userId: Types.ObjectId): string => {
+
+export const generateAccessToken = (user: IUser): string => {
     const JWT_SECRET_KEY = config.JWT_SECRET_KEY as string;
-    const payload = { userId } as Itoken;
+    // const payload = { ...user } as IUser;
+    const payload = {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        profileImg: user.profileImg,
+    };
     return jwt.sign(payload, JWT_SECRET_KEY, { expiresIn: '15m' });
 };
 
-export const generateRefreshToken = (userId: Types.ObjectId): string => {
+export const generateRefreshToken = (user: IUser): string => {
     const JWT_SECRET_KEY = config.JWT_SECRET_KEY as string;
-    const payload = { userId } as Itoken;
+    // const payload = { ...user } as IUser;
+    const payload = {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        profileImg: user.profileImg,
+    };
     return jwt.sign(payload, JWT_SECRET_KEY, { expiresIn: '7d' });
 };
 
-export const verifyAccessToken = (token: string): Itoken => {
+export const verifyAccessToken = (token: string): IUser => {
     const JWT_SECRET_KEY = config.JWT_SECRET_KEY as string;
     try {
-        const verify = jwt.verify(token, JWT_SECRET_KEY) as Itoken;
+        const verify = jwt.verify(token, JWT_SECRET_KEY) as IUser;
         return verify
     } catch (error) {
         throw new CustomError('Invalid or expired access token', 401);
     }
 };
 
-export const verifyRefreshToken = (token: string): Itoken => {
+export const verifyRefreshToken = (token: string): IUser => {
     const JWT_SECRET_KEY = config.JWT_SECRET_KEY as string;
     try {
-        return jwt.verify(token, JWT_SECRET_KEY) as Itoken;
+        return jwt.verify(token, JWT_SECRET_KEY) as IUser;
     } catch {
         throw new CustomError('Invalid or expired refresh token', 401);
     }

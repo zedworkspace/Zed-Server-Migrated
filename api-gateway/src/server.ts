@@ -25,7 +25,26 @@ const proxyOptions = {
   },
 }
 
-app.use("/api/v1", proxy(config.USER_SERVICE_URL, proxyOptions))
+
+// user service
+app.use("/api/v1/user", proxy(config.USER_SERVICE_URL, proxyOptions))
+app.use("/api/v1/profile", proxy(config.USER_SERVICE_URL, proxyOptions))
+app.use("/api/v1/logout", proxy(config.USER_SERVICE_URL, proxyOptions))
+
+// project service
+app.use("/api/v1/projects", proxy(config.PROJECT_SERVICE_URL, proxyOptions))
+app.use("/api/v1/invite", proxy(config.PROJECT_SERVICE_URL, proxyOptions))
+app.use("/api/v1/activity", proxy(config.PROJECT_SERVICE_URL, proxyOptions))
+app.use("/api/v1/project/members", proxy(config.PROJECT_SERVICE_URL, proxyOptions))
+
+// board service
+app.use("/api/v1/boards", proxy(config.BOARD_SERVICE_URL, proxyOptions))
+app.use("/api/v1/lists", proxy(config.BOARD_SERVICE_URL, proxyOptions))
+app.use("/api/v1/cards", proxy(config.BOARD_SERVICE_URL, proxyOptions))
+
+// channel service
+app.use("/api/v1/channel", proxy(config.CHANNEL_SERVICE_URL, proxyOptions))
+app.use("/api/v1/messages", proxy(config.CHANNEL_SERVICE_URL, proxyOptions))
 
 app.use(globalErrorHandler)
 
