@@ -9,6 +9,7 @@ import { initKafkaTopics } from "./kafka/admin";
 import { consumeProjectCreated } from "./kafka/consumer";
 import listRouter from "./routes/listRouter";
 import cardRouter from "./routes/cardRouter";
+import { connectProducer } from "./kafka/producer";
 
 
 
@@ -27,6 +28,7 @@ app.use("/api/lists", listRouter);
 app.use("/api/cards", cardRouter);
 
 initKafkaTopics()
+connectProducer()
 consumeProjectCreated()
 
 

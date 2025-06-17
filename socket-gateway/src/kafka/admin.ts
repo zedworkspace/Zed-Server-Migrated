@@ -21,6 +21,31 @@ const topicsList = [
         numPartitions: 1,
         replicationFactor: 1,
     },
+    {
+        topic: "create_list",
+        numPartitions: 1,
+        replicationFactor: 1,
+    },
+    {
+        topic: "create_card",
+        numPartitions: 1,
+        replicationFactor: 1,
+    },
+    {
+        topic: "board_updated",
+        numPartitions: 1,
+        replicationFactor: 1,
+    },
+    {
+        topic: "list_created",
+        numPartitions: 1,
+        replicationFactor: 1,
+    },
+    {
+        topic: "card_created",
+        numPartitions: 1,
+        replicationFactor: 1,
+    },
 ];
 
 export async function initKafkaTopics(maxRetries = 5, delayMs = 3000) {

@@ -2,7 +2,14 @@ import express from "express";
 import { Server } from "socket.io";
 import http from "node:http";
 import { config } from "./configs/config";
-import { connectProducer, readMessageProducer, sendMessageProducer } from "./kafka/producer";
+import {
+  boardUpdateProducer,
+  connectProducer,
+  createCardProducer,
+  createListProducer,
+  readMessageProducer,
+  sendMessageProducer,
+} from "./kafka/producer";
 import { ISendMessageInfo } from "zedspace-shared-types";
 import { startKafkaConsumers } from "./kafka/consumer";
 import { initKafkaTopics } from "./kafka/admin";
@@ -10,7 +17,7 @@ import { waitForKafka } from "./kafka/waitForKafka";
 const app = express();
 
 const server = http.createServer(app);
-const PORT = config.SERVER_PORT || 5005
+const PORT = config.SERVER_PORT || 5005;
 var io = new Server(server, {
   cors: {
     origin: config.ALLOWED_ORIGINS?.split(",") || ["http://localhost:3000"],
@@ -19,10 +26,10 @@ var io = new Server(server, {
 });
 
 const startServer = async () => {
-  await initKafkaTopics()
-  await waitForKafka()
-  await startKafkaConsumers()
-  await connectProducer()
+  await initKafkaTopics();
+  await waitForKafka();
+  await startKafkaConsumers();
+  await connectProducer();
   io.on("connection", (socket) => {
     console.log("A user connected:", socket.id);
 
@@ -43,30 +50,52 @@ const startServer = async () => {
 
     socket.on("readMessage", async (data) => {
       try {
-        await readMessageProducer(data)
+        await readMessageProducer(data);
       } catch (error) {
         console.error("Error marking messages as read:", error);
       }
     });
 
+    socket.on("onCreateCard", async ({ data, listId, boardId, userId }) => {
+      await createCardProducer({ body: data, listId, userId, boardId });
+    });
 
+    socket.on("onCreateList", async ({ data, boardId }) => {
+      await createListProducer({ body: data, boardId });
+    });
+
+    socket.on("onCardDrop", async (boardId) => {
+      await boardUpdateProducer({ boardId });
+    });
+
+    socket.on("onChangeListPosition", async (boardId) => {
+      await boardUpdateProducer({ boardId });
+    });
+
+    socket.on("onChangeCardPositionWithInList", async (boardId) => {
+      await boardUpdateProducer({ boardId });
+    });
+
+    socket.on("disconnect", () => {
+      console.log("User disconnected:", socket.id);
+    });
   });
 
   server.listen(PORT, () => {
-    console.log("")
+    console.log("");
     console.log("███████╗ ██████╗  ██████╗██╗  ██╗███████╗████████╗     ██████╗  █████╗ ████████╗███████╗██╗    ██╗ █████╗ ██╗   ██╗")
     console.log("██╔════╝██╔═══██╗██╔════╝██║ ██╔╝██╔════╝╚══██╔══╝    ██╔════╝ ██╔══██╗╚══██╔══╝██╔════╝██║    ██║██╔══██╗╚██╗ ██╔╝")
     console.log("███████╗██║   ██║██║     █████╔╝ █████╗     ██║       ██║  ███╗███████║   ██║   █████╗  ██║ █╗ ██║███████║ ╚████╔╝ ")
     console.log("╚════██║██║   ██║██║     ██╔═██╗ ██╔══╝     ██║       ██║   ██║██╔══██║   ██║   ██╔══╝  ██║███╗██║██╔══██║  ╚██╔╝  ")
     console.log("███████║╚██████╔╝╚██████╗██║  ██╗███████╗   ██║       ╚██████╔╝██║  ██║   ██║   ███████╗╚███╔███╔╝██║  ██║   ██║   ")
     console.log("╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝        ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝   ")
-    console.log("")
-    console.log("🏃‍♂️ ZED IS RUNNING AND READY!")
-    console.log(`⚡ Server active on http://localhost:${PORT}`)
+    console.log("");
+    console.log("🏃‍♂️ ZED IS RUNNING AND READY!");
+    console.log(`⚡ Server active on http://localhost:${PORT}`);
   });
 };
 startServer();
 
 export function getIO() {
-  return io
-};
+  return io;
+}

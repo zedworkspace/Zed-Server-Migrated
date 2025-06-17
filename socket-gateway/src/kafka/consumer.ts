@@ -14,24 +14,30 @@ const consumer = kafka.consumer({
   },
 });
 
-// Single consumer function that handles both topics
 export const startKafkaConsumers = async () => {
   try {
-    // Ensure both topics exist
     await topicFallback("message_created");
     await topicFallback("send_message");
     await topicFallback("read_message_update");
+    await topicFallback("list_created");
+    await topicFallback("card_created");
 
     await consumer.connect();
 
-    // Subscribe to both topics
     await consumer.subscribe({
-      topics: ["message_created", "send_message"],
+      topics: [
+        "message_created",
+        "send_message",
+        "read_message_update",
+        "list_created",
+        "card_created",
+      ],
       fromBeginning: true,
     });
 
     await consumer.run({
       eachMessage: async ({ topic, message }) => {
+        console.log("TOPIC:", topic);
         const io = getIO();
         if (topic === "message_created") {
           const data: IMessageCreated = JSON.parse(message.value?.toString()!);
@@ -70,19 +76,21 @@ export const startKafkaConsumers = async () => {
           const { channelId, userId }: { channelId: string; userId: string } =
             JSON.parse(message.value?.toString()!);
           io.to(channelId).emit("messagesRead", { channelId, userId });
-        }
-        // else if (topic === "send_message") {
-        //   const data: {
-        //     channelId: string;
-        //     message: IMessage;
-        //   } = JSON.parse(message.value?.toString()!);
+        } else if (topic === "list_created") {
+          const lists: any[] = JSON.parse(message.value?.toString()!);
 
-        //   io.to(data.channelId).emit("receiveMessage", data.message);
-        // }
+          io.emit("onUpdateList", lists);
+        } else if (topic === "card_created") {
+          const lists: any[] = JSON.parse(message.value?.toString()!);
+          io.emit("onUpdateList", lists);
+        } else if (topic === "board_updated") {
+          const lists: any[] = JSON.parse(message.value?.toString()!);
+          io.emit("onUpdateList", lists);
+        }
       },
     });
 
-    console.log("✅ Kafka Consumers started successfully for both topics");
+    console.log("Kafka Consumers started successfully for both topics");
   } catch (error) {
     console.log("KAFKA CONSUMER ERROR:", error);
   }

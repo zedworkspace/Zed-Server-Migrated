@@ -1,3 +1,6 @@
+import mongoose from "mongoose";
+import { Profile } from "./profile";
+
 export type ICardMovedEvent = {
     entityId: string,
     entityType: string,
@@ -8,4 +11,42 @@ export type ICardMovedEvent = {
     boardId?: string,
     user: string,
     timestamp: Date,
+}
+
+export interface ICard {
+  listId: mongoose.Schema.Types.ObjectId;
+  title: string;
+  description?: string;
+  labels?: string[];
+  dueDate?: Date;
+  assignees?: Profile[];
+  position: number;
+  status: string;
+  isDeleted:boolean
+}
+
+export interface IUpdateCardPositionInDnd {
+  fromListId: string;
+  cardId: string;
+  toListId: string;
+  boardId: string;
+}
+
+export interface IUpdateCardPositionInSameListBody {
+  listId: string;
+  fromCardId: string;
+  toCardId: string;
+}
+
+export interface IUpdateCardPositionInDiffListsBody {
+  fromListId: string;
+  toListId: string;
+  fromCardId: string;
+  toCardId: string;
+}
+export interface ICreateCard {
+  listId: string;
+  body: { title: string };
+  userId: string;
+  boardId:string
 }

@@ -4,7 +4,32 @@ const topicsList = [
     {
         topic: "project_created",
         numPartitions: 1,
-        replicationFactor: 1, // Good for single-broker
+        replicationFactor: 1,
+    },
+    {
+        topic: "card_moved",
+        numPartitions: 1,
+        replicationFactor: 1,
+    },
+    {
+        topic: "list_created",
+        numPartitions: 1,
+        replicationFactor: 1,
+    },
+    {
+        topic: "card_created",
+        numPartitions: 1,
+        replicationFactor: 1,
+    },
+    {
+        topic: "board_updated",
+        numPartitions: 1,
+        replicationFactor: 1,
+    },
+    {
+        topic: "create_card",
+        numPartitions: 1,
+        replicationFactor: 1,
     },
 ];
 

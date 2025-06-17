@@ -1,52 +1,110 @@
 import kafka from "../configs/kafka";
 import Board from "../models/boardModel";
+import { createCardByListId } from "../services/cardServices";
+import {
+  createListByBoardId,
+  getListsByBoardId,
+} from "../services/listServices";
+import { parseMessage } from "../utils/parseKafkaMesssages";
+import {
+  boardUpdatedProducer,
+  cardCreatedProducer,
+  listCreatedProducer,
+} from "./producer";
 import topicFallback from "./topicFallback";
-
+import { ICreateCard } from "zedspace-shared-types";
 const consumer = kafka.consumer({ groupId: "board-service-group" });
 
-const topic = process.env.KAFKA_TOPIC_PROJECT || "project_created";
-
 export async function consumeProjectCreated() {
-    try {
-        await topicFallback(topic)
-        // Now connect the consumer
-        console.log("Consumer connecting...");
-        await consumer.connect();
-        console.log("Consumer connected!");
+  try {
+    await topicFallback("project_created");
+    await topicFallback("create_list");
+    await topicFallback("create_card");
+    await consumer.connect();
+    await consumer.subscribe({
+      topics: ["project_created", "create_list", "create_card"],
+      fromBeginning: true,
+    });
+    await consumer.run({
+      eachMessage: async ({ topic, message }) => {
+        // console.log("TOPIC:", topic);
+        const messageValue = message.value?.toString();
 
-        await consumer.subscribe({ topic, fromBeginning: true });
+        if (!messageValue) {
+          console.log("MESSAGE VALUE IS UNDEFINED");
+          return;
+        }
 
-        await consumer.run({
-            eachMessage: async ({ topic, message }) => {
+        if (topic === "project_created") {
+          const parsedMessage = await parseMessage<{
+            name: string;
+            projectId: string;
+            isDefault: boolean;
+          }>({ messageValue });
 
-                console.log("Topic:", topic);
-                console.log("Message:", message);
+          if (!parsedMessage) {
+            return;
+          }
 
-                const messageValueStr = message.value?.toString();
+          await Board.create({
+            name: parsedMessage.name,
+            projectId: parsedMessage.projectId,
+            isDefault: parsedMessage.isDefault,
+          });
+        } else if (topic === "create_list") {
+          const parsedMessage = await parseMessage<{
+            body: { name: string };
+            boardId: string;
+          }>({ messageValue });
 
-                // Step 2: Parse it to object
-                let parsedMessage: { name: string; projectId: string; isDefault: boolean };
-                try {
-                    parsedMessage = JSON.parse(messageValueStr || '{}');
-                } catch (error) {
-                    console.error("Failed to parse Kafka message:", error);
-                    return;
-                }
-                console.log("Parsed Message:", parsedMessage);
+          if (!parsedMessage) {
+            return;
+          }
 
-                await Board.create({
-                    name: parsedMessage.name,
-                    projectId: parsedMessage.projectId,
-                    isDefault: parsedMessage.isDefault,
-                });
+          await createListByBoardId({
+            body: parsedMessage.body,
+            boardId: parsedMessage.boardId,
+          });
 
-                console.log("Board saved successfully.");
-                console.log("MISSION SUCCESS....")
+          const lists = await getListsByBoardId({
+            boardId: parsedMessage.boardId,
+          });
 
-            },
-        });
+          await listCreatedProducer({ boardId: parsedMessage.boardId, lists });
+        } else if (topic === "create_card") {
+          const parsedMessage = await parseMessage<ICreateCard>({
+            messageValue,
+          });
 
-    } catch (error) {
-        console.error("Kafka consumer setup error:", error);
-    }
+          if (!parsedMessage) {
+            return;
+          }
+
+          await createCardByListId(parsedMessage);
+
+          const lists = await getListsByBoardId({
+            boardId: parsedMessage.boardId,
+          });
+
+          await cardCreatedProducer({ boardId: parsedMessage.boardId, lists });
+        } else if (topic === "board_updated") {
+          const parsedMessage = await parseMessage<{ boardId: string }>({
+            messageValue,
+          });
+
+          if (!parsedMessage) {
+            return;
+          }
+
+          const lists = await getListsByBoardId({
+            boardId: parsedMessage.boardId,
+          });
+
+          await boardUpdatedProducer({ boardId: parsedMessage.boardId, lists });
+        }
+      },
+    });
+  } catch (error) {
+    console.error("Kafka consumer setup error:", error);
+  }
 }

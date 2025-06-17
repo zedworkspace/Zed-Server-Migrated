@@ -31,7 +31,6 @@ export const createCardByListId = async ({
     status: currentList?.name,
   });
 
-
   await cardMovedEvent({
     entityId: card._id.toString(),
     entityType: "Card",
@@ -41,7 +40,7 @@ export const createCardByListId = async ({
     boardId: currentList.boardId.toString(),
     user: userId,
     timestamp: new Date(),
-  })
+  });
 
   // await Activity.create({
   //   entityId: card._id,
@@ -53,7 +52,7 @@ export const createCardByListId = async ({
   //   user: new mongoose.Types.ObjectId(userId),
   //   timestamp: new Date(),
   // });
-
+  console.log("CARD:", card);
   return card;
 };
 
@@ -117,7 +116,7 @@ export const editCardById = async (
       details: `Moved this card from "${currentCard?.status}" to "${status}"`,
       user: userId,
       timestamp: new Date(),
-    })
+    });
 
     return updatedCard;
   } else {
@@ -127,7 +126,6 @@ export const editCardById = async (
       { new: true }
     );
   }
-
 };
 
 export const updateCardPositionInDnd = async (
@@ -174,7 +172,7 @@ export const updateCardPositionInDnd = async (
     boardId,
     user: userId,
     timestamp: new Date(),
-  })
+  });
 
   return toList;
 };
